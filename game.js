@@ -4,24 +4,26 @@ const ctx = canvas.getContext('2d');
 
 // 食材类
 class Ingredient {
-  constructor(x, y, width, height, srcImg) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.isDragging = false;
-    this.img = new Image();
-    this.img.src = srcImg;
+    constructor(x, y, width, height, srcImg, redValueChange) {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
+      this.isDragging = false;
+      this.img = new Image();
+      this.img.src = srcImg;
+      this.redValueChange = redValueChange; // 控制餐台红色值的加减
+    }
   }
-}
 
 // 创建食材对象
-const ingredient1 = new Ingredient(100, 100, 50, 50, './images/spice.png');
-const ingredient2 = new Ingredient(200, 200, 50, 50, './images/spice.png');
+const ingredient1 = new Ingredient(100, 100, 50, 50, './images/spice.png',10);
+const ingredient2 = new Ingredient(200, 200, 50, 50, './images/spice.png',10);
+const ingredient3 = new Ingredient(600, 200, 50, 50, './images/milk.png',-5);
 // 添加更多的食材对象...
 
 // 食材对象数组
-const ingredientList = [ingredient1, ingredient2];
+const ingredientList = [ingredient1, ingredient2, ingredient3];
 // 添加更多的食材对象到数组...
 
 // 餐台框对象
@@ -30,10 +32,12 @@ const table = {
     y: 200,
     width: 200,
     height: 200,
-    baseColor: '#808080',
+    baseColor: 'white',
     maxRedValue: 255,
-    redValue: 0
-};
+    redValue: 0,
+    maxOpacity: 1,
+    opacity: 1
+  };
 
 // 监听鼠标事件
 canvas.addEventListener('mousedown', handleMouseDown);
@@ -77,11 +81,9 @@ function handleMouseMove(event) {
         ingredient.y + ingredient.height <= table.y + table.height
       );
 
-      // 更新餐台框的红色值
+      // 更新餐台框的红色值和透明度
       if (isInsideTable) {
-        table.redValue = Math.min(table.redValue + 1, table.maxRedValue);
-      } else {
-        table.redValue = Math.max(table.redValue - 1, 0);
+        table.redValue = Math.max(0, Math.min(table.redValue + ingredient.redValueChange, table.maxRedValue));
       }
 
       // 清空画布
@@ -109,6 +111,10 @@ function handleMouseUp() {
 function drawTable() {
     ctx.fillStyle = `rgb(${table.redValue}, 0, 0)`;
     ctx.fillRect(table.x, table.y, table.width, table.height);
+    // 绘制白色边框
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(table.x, table.y, table.width, table.height);
 }
         
 // 渲染初始画面
